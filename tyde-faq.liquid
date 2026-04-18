@@ -1,0 +1,227 @@
+<style>
+  .tyde-faq {
+    --tyde-bg: #E8F4F8;
+    --tyde-card-closed: #E8F4F8;
+    --tyde-card-open: #FFFFFF;
+    --tyde-border: #1A6B7C;
+    --tyde-text: #0A2E3A;
+    --tyde-accent: #F5C842;
+    --tyde-btn-bg: #1A6B7C;
+    --tyde-btn-icon: #FFFFFF;
+    background: var(--tyde-bg);
+    padding: 10px 100px;
+    overflow: hidden;
+  }
+  .tyde-faq__container { max-width: 1100px; margin: 0 auto; }
+  .tyde-faq__title {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+    margin: 0 auto 18px;
+    color: var(--tyde-text);
+    text-align: center;
+    font-family: 'Oswald','Lato',sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+  .tyde-faq__title-highlight { position: relative; display: inline-block; z-index: 2; }
+  .tyde-faq__title-highlight::after {
+    content: ""; position: absolute;
+    left: -4px; right: -4px; bottom: 4px;
+    height: 14px; background: var(--tyde-accent);
+    z-index: -1;
+  }
+  .tyde-faq__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  @media (min-width: 992px) {
+    .tyde-faq__grid { grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+  }
+  .tyde-faq__item {
+    background: var(--tyde-card-closed);
+    border: 1.5px solid var(--tyde-border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: background .3s ease;
+  }
+  .tyde-faq__item.is-open { background: var(--tyde-card-open); }
+  .tyde-faq__summary {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding: 18px 64px 18px 22px;
+    background: transparent; border: none; cursor: pointer;
+    text-align: left; position: relative;
+    color: var(--tyde-text);
+    font-family: 'Lato',sans-serif;
+    font-size: 16px; font-weight: 700; line-height: 1.35;
+  }
+  .tyde-faq__icon {
+    position: absolute; right: 16px; top: 50%;
+    transform: translateY(-50%);
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--tyde-btn-bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tyde-faq__icon svg { width: 15px; height: 15px; stroke: var(--tyde-btn-icon); }
+  .tyde-faq__icon .icon-minus { display: none; }
+  .tyde-faq__item.is-open .icon-plus { display: none; }
+  .tyde-faq__item.is-open .icon-minus { display: block; }
+  .tyde-faq__content {
+    height: 0; opacity: 0; overflow: hidden;
+    padding: 0 22px;
+    transition: height .3s ease, opacity .3s ease;
+  }
+  .tyde-faq__item.is-open .tyde-faq__content { opacity: 1; }
+  .tyde-faq__content-inner {
+    padding-bottom: 18px;
+    color: var(--tyde-text);
+    font-family: 'Lato',sans-serif;
+    font-size: 15px; line-height: 1.55; font-weight: 400;
+  }
+  @media (max-width: 991px) {
+    .tyde-faq { padding: 6px 20px; }
+    .tyde-faq__title { font-size: 22px; margin-bottom: 12px; }
+    .tyde-faq__title-highlight::after { height: 8px; bottom: 2px; }
+    .tyde-faq__summary { padding: 12px 50px 12px 14px; font-size: 13px; }
+    .tyde-faq__icon { width: 26px; height: 26px; right: 10px; }
+    .tyde-faq__icon svg { width: 13px; height: 13px; }
+    .tyde-faq__content { padding: 0 14px; }
+    .tyde-faq__content-inner { padding-bottom: 12px; font-size: 12.5px; }
+    .tyde-faq__grid { gap: 8px; }
+  }
+</style>
+
+<section class="tyde-faq" id="tyde-faq-section">
+  <div class="tyde-faq__container">
+    <h2 class="tyde-faq__title">
+      Common Questions People Ask About
+      <span class="tyde-faq__title-highlight">Tyde</span>
+    </h2>
+
+    <div class="tyde-faq__grid">
+
+      <div class="tyde-faq__item">
+        <button type="button" class="tyde-faq__summary" aria-expanded="false">
+          <span>How long does one bottle last?</span>
+          <span class="tyde-faq__icon" aria-hidden="true">
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+        </button>
+        <div class="tyde-faq__content"><div class="tyde-faq__content-inner">
+          <p>Each bottle contains 60 capsules — a 30-day supply when taken as directed (2 capsules daily).</p>
+        </div></div>
+      </div>
+
+      <div class="tyde-faq__item">
+        <button type="button" class="tyde-faq__summary" aria-expanded="false">
+          <span>Are there any side effects?</span>
+          <span class="tyde-faq__icon" aria-hidden="true">
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+        </button>
+        <div class="tyde-faq__content"><div class="tyde-faq__content-inner">
+          <p>Tyde is made with premium natural ingredients and is non-habit forming. Always consult your doctor before starting any supplement.</p>
+        </div></div>
+      </div>
+
+      <div class="tyde-faq__item">
+        <button type="button" class="tyde-faq__summary" aria-expanded="false">
+          <span>When will I see results?</span>
+          <span class="tyde-faq__icon" aria-hidden="true">
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+        </button>
+        <div class="tyde-faq__content"><div class="tyde-faq__content-inner">
+          <p>Most customers notice improved energy and focus within 2–3 weeks of consistent daily use.</p>
+        </div></div>
+      </div>
+
+      <div class="tyde-faq__item">
+        <button type="button" class="tyde-faq__summary" aria-expanded="false">
+          <span>Is it FDA approved?</span>
+          <span class="tyde-faq__icon" aria-hidden="true">
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+        </button>
+        <div class="tyde-faq__content"><div class="tyde-faq__content-inner">
+          <p>Tyde is produced in an FDA-registered facility following strict GMP guidelines.</p>
+        </div></div>
+      </div>
+
+      <div class="tyde-faq__item">
+        <button type="button" class="tyde-faq__summary" aria-expanded="false">
+          <span>What's your return policy?</span>
+          <span class="tyde-faq__icon" aria-hidden="true">
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+        </button>
+        <div class="tyde-faq__content"><div class="tyde-faq__content-inner">
+          <p>We offer a 30-day money-back guarantee. If you're not satisfied, we'll refund your order.</p>
+        </div></div>
+      </div>
+
+      <div class="tyde-faq__item">
+        <button type="button" class="tyde-faq__summary" aria-expanded="false">
+          <span>How do I take it?</span>
+          <span class="tyde-faq__icon" aria-hidden="true">
+            <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+        </button>
+        <div class="tyde-faq__content"><div class="tyde-faq__content-inner">
+          <p>Take 2 capsules daily with water, preferably in the morning or with a meal.</p>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    var root = document.getElementById('tyde-faq-section');
+    if (!root) return;
+    var items = Array.prototype.slice.call(root.querySelectorAll('.tyde-faq__item'));
+    function expand(card){
+      var btn = card.querySelector('.tyde-faq__summary');
+      var panel = card.querySelector('.tyde-faq__content');
+      if (card.classList.contains('is-open')) return;
+      card.classList.add('is-open');
+      btn.setAttribute('aria-expanded','true');
+      panel.style.height = panel.scrollHeight + 'px';
+      var done = function(e){ if (e.propertyName!=='height') return; panel.style.height='auto'; panel.removeEventListener('transitionend', done); };
+      panel.addEventListener('transitionend', done);
+    }
+    function collapse(card){
+      if (!card.classList.contains('is-open')) return;
+      var btn = card.querySelector('.tyde-faq__summary');
+      var panel = card.querySelector('.tyde-faq__content');
+      btn.setAttribute('aria-expanded','false');
+      panel.style.height = panel.offsetHeight + 'px';
+      requestAnimationFrame(function(){ panel.style.height='0px'; });
+      var done = function(e){ if (e.propertyName!=='height') return; card.classList.remove('is-open'); panel.removeEventListener('transitionend', done); };
+      panel.addEventListener('transitionend', done);
+    }
+    items.forEach(function(card){
+      card.querySelector('.tyde-faq__content').style.height='0px';
+      card.querySelector('.tyde-faq__summary').addEventListener('click', function(){
+        var opening = !card.classList.contains('is-open');
+        items.forEach(function(o){ if (o!==card) collapse(o); });
+        if (opening) expand(card); else collapse(card);
+      });
+    });
+  })();
+</script>
