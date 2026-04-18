@@ -1,0 +1,309 @@
+{% comment %}
+  Tyde — Common Questions FAQ Section
+  Brand colors: teal (#1A6B7C), light cream (#F5FAFB), gold accent (#F5C842)
+  Usage: Add as a section in theme editor. All content editable via blocks.
+{% endcomment %}
+
+<style>
+  .tyde-faq-{{ section.id }} {
+    --tyde-bg: {{ section.settings.bg_color }};
+    --tyde-card-closed: {{ section.settings.card_closed_color }};
+    --tyde-card-open: {{ section.settings.card_open_color }};
+    --tyde-border: {{ section.settings.border_color }};
+    --tyde-text: {{ section.settings.text_color }};
+    --tyde-accent: {{ section.settings.accent_color }};
+    --tyde-btn-bg: {{ section.settings.btn_bg_color }};
+    --tyde-btn-icon: {{ section.settings.btn_icon_color }};
+    --radius: 14px;
+
+    background: var(--tyde-bg);
+    padding: 60px 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__title {
+    position: relative;
+    width: max-content;
+    max-width: 100%;
+    margin: 0 auto 40px;
+    color: var(--tyde-text);
+    text-align: center;
+    font-family: 'Oswald', 'Lato', sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__title-highlight {
+    position: relative;
+    display: inline-block;
+    z-index: 2;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__title-highlight::after {
+    content: "";
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    bottom: 4px;
+    height: 14px;
+    background: var(--tyde-accent);
+    z-index: -1;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  @media (min-width: 992px) {
+    .tyde-faq-{{ section.id }} .tyde-faq__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 26px 30px;
+    }
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__item {
+    background: var(--tyde-card-closed);
+    border: 1.5px solid var(--tyde-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__item.is-open {
+    background: var(--tyde-card-open);
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__summary {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 72px 22px 22px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    position: relative;
+    color: var(--tyde-text);
+    font-family: 'Lato', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--tyde-btn-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--tyde-btn-icon);
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__icon .icon-minus { display: none; }
+  .tyde-faq-{{ section.id }} .tyde-faq__item.is-open .icon-plus { display: none; }
+  .tyde-faq-{{ section.id }} .tyde-faq__item.is-open .icon-minus { display: block; }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__content {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0 22px;
+    transition: height 0.3s ease, opacity 0.3s ease;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__item.is-open .tyde-faq__content {
+    opacity: 1;
+  }
+
+  .tyde-faq-{{ section.id }} .tyde-faq__content-inner {
+    padding-bottom: 22px;
+    color: var(--tyde-text);
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 400;
+  }
+
+  @media (max-width: 991px) {
+    .tyde-faq-{{ section.id }} { padding: 36px 16px; }
+    .tyde-faq-{{ section.id }} .tyde-faq__title {
+      font-size: 26px;
+      margin-bottom: 22px;
+    }
+    .tyde-faq-{{ section.id }} .tyde-faq__title-highlight::after {
+      height: 8px;
+      bottom: 2px;
+    }
+    .tyde-faq-{{ section.id }} .tyde-faq__summary {
+      padding: 16px 60px 16px 16px;
+      font-size: 14px;
+    }
+    .tyde-faq-{{ section.id }} .tyde-faq__icon {
+      width: 26px;
+      height: 26px;
+      right: 14px;
+    }
+    .tyde-faq-{{ section.id }} .tyde-faq__icon svg { width: 13px; height: 13px; }
+    .tyde-faq-{{ section.id }} .tyde-faq__content { padding: 0 16px; }
+    .tyde-faq-{{ section.id }} .tyde-faq__content-inner {
+      padding-bottom: 16px;
+      font-size: 13px;
+    }
+    .tyde-faq-{{ section.id }} .tyde-faq__grid { gap: 12px; }
+  }
+</style>
+
+<section class="tyde-faq-{{ section.id }}" id="tyde-faq-{{ section.id }}">
+  <div class="tyde-faq__container">
+    <h2 class="tyde-faq__title">
+      {{ section.settings.heading_before }}
+      <span class="tyde-faq__title-highlight">{{ section.settings.heading_highlight }}</span>
+    </h2>
+
+    <div class="tyde-faq__grid">
+      {% for block in section.blocks %}
+        <div class="tyde-faq__item" {{ block.shopify_attributes }}>
+          <button
+            type="button"
+            class="tyde-faq__summary"
+            aria-expanded="false"
+            aria-controls="tyde-faq-{{ section.id }}-{{ forloop.index }}">
+            <span>{{ block.settings.question }}</span>
+            <span class="tyde-faq__icon" aria-hidden="true">
+              <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <svg class="icon-minus" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </span>
+          </button>
+          <div id="tyde-faq-{{ section.id }}-{{ forloop.index }}" class="tyde-faq__content">
+            <div class="tyde-faq__content-inner">
+              {{ block.settings.answer }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    var root = document.getElementById('tyde-faq-{{ section.id }}');
+    if (!root) return;
+    var items = Array.prototype.slice.call(root.querySelectorAll('.tyde-faq__item'));
+
+    function expand(card){
+      var btn = card.querySelector('.tyde-faq__summary');
+      var panel = card.querySelector('.tyde-faq__content');
+      if (card.classList.contains('is-open')) return;
+      card.classList.add('is-open');
+      btn.setAttribute('aria-expanded', 'true');
+      panel.style.height = panel.scrollHeight + 'px';
+      var done = function(e){
+        if (e.propertyName !== 'height') return;
+        panel.style.height = 'auto';
+        panel.removeEventListener('transitionend', done);
+      };
+      panel.addEventListener('transitionend', done);
+    }
+
+    function collapse(card){
+      if (!card.classList.contains('is-open')) return;
+      var btn = card.querySelector('.tyde-faq__summary');
+      var panel = card.querySelector('.tyde-faq__content');
+      btn.setAttribute('aria-expanded', 'false');
+      panel.style.height = panel.offsetHeight + 'px';
+      requestAnimationFrame(function(){ panel.style.height = '0px'; });
+      var done = function(e){
+        if (e.propertyName !== 'height') return;
+        card.classList.remove('is-open');
+        panel.removeEventListener('transitionend', done);
+      };
+      panel.addEventListener('transitionend', done);
+    }
+
+    items.forEach(function(card){
+      card.querySelector('.tyde-faq__content').style.height = '0px';
+      card.querySelector('.tyde-faq__summary').addEventListener('click', function(){
+        var opening = !card.classList.contains('is-open');
+        items.forEach(function(o){ if (o !== card) collapse(o); });
+        if (opening) expand(card); else collapse(card);
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Tyde FAQ",
+  "tag": "section",
+  "class": "tyde-faq-wrapper",
+  "settings": [
+    { "type": "header", "content": "Heading" },
+    { "type": "text", "id": "heading_before", "label": "Heading text", "default": "Common Questions People Ask About" },
+    { "type": "text", "id": "heading_highlight", "label": "Highlighted word", "default": "Tyde" },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Section background", "default": "#E8F4F8" },
+    { "type": "color", "id": "card_closed_color", "label": "Card background (closed)", "default": "#E8F4F8" },
+    { "type": "color", "id": "card_open_color", "label": "Card background (open)", "default": "#FFFFFF" },
+    { "type": "color", "id": "border_color", "label": "Card border", "default": "#1A6B7C" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#0A2E3A" },
+    { "type": "color", "id": "accent_color", "label": "Title highlight accent", "default": "#F5C842" },
+    { "type": "color", "id": "btn_bg_color", "label": "Plus/minus button background", "default": "#1A6B7C" },
+    { "type": "color", "id": "btn_icon_color", "label": "Plus/minus icon color", "default": "#FFFFFF" }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ Item",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Your question here?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Your answer goes here. Keep it clear and concise.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tyde FAQ",
+      "blocks": [
+        { "type": "faq", "settings": { "question": "How long does one bottle last?", "answer": "<p>Each bottle contains 60 capsules — a 30-day supply when taken as directed (2 capsules daily).</p>" } },
+        { "type": "faq", "settings": { "question": "Are there any side effects?", "answer": "<p>Tyde is made with premium natural ingredients and is non-habit forming. Always consult your doctor before starting any supplement.</p>" } },
+        { "type": "faq", "settings": { "question": "When will I see results?", "answer": "<p>Most customers notice improved energy and focus within 2–3 weeks of consistent daily use.</p>" } },
+        { "type": "faq", "settings": { "question": "Is it FDA approved?", "answer": "<p>Tyde is produced in an FDA-registered facility following strict GMP guidelines.</p>" } },
+        { "type": "faq", "settings": { "question": "What’s your return policy?", "answer": "<p>We offer a 30-day money-back guarantee. If you’re not satisfied, we’ll refund your order.</p>" } },
+        { "type": "faq", "settings": { "question": "How do I take it?", "answer": "<p>Take 2 capsules daily with water, preferably in the morning or with a meal.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
