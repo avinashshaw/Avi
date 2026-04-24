@@ -1,0 +1,209 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+  .tyde-steps {
+    --tyde-bg: #F5FAFB;
+    --tyde-text: #0A2E3A;
+    --tyde-text-light: #35707F;
+    --tyde-accent: #F5C842;
+    --tyde-circle-bg: #1A6B7C;
+    --tyde-circle-icon: #F5C842;
+    --tyde-btn-bg: #1A6B7C;
+    --tyde-btn-text: #FFFFFF;
+    --tyde-btn-accent: #F5C842;
+    --tyde-dash: #1A6B7C;
+    background: var(--tyde-bg);
+    padding: 40px 20px 30px;
+    font-family: 'Bebas Neue', sans-serif;
+  }
+  .tyde-steps__wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 40px; }
+
+  .tyde-steps__heading {
+    position: relative;
+    margin: 0;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;          /* bumped from 44px */
+    font-weight: 400;          /* Bebas single weight */
+    color: var(--tyde-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 1.05;
+  }
+  .tyde-steps__heading-highlight { position: relative; z-index: 2; display: inline-block; }
+  .tyde-steps__heading-highlight::after {
+    content: ""; position: absolute;
+    left: -4px; right: -4px; bottom: 6px;
+    height: 20px; background: var(--tyde-accent);
+    z-index: -1;
+  }
+
+  .tyde-steps__row {
+    display: flex; align-items: flex-start; justify-content: center;
+    gap: 0; flex-wrap: nowrap; width: 100%;
+    padding-top: 6px;
+  }
+  .tyde-steps__item {
+    display: flex; align-items: center; gap: 22px;
+    flex: 0 1 auto;
+  }
+  .tyde-steps__icon {
+    flex-shrink: 0;
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    background: var(--tyde-circle-bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tyde-steps__icon svg { width: 44px; height: 44px; fill: var(--tyde-circle-icon); }
+  .tyde-steps__body { max-width: 230px; position: relative; }
+
+  .tyde-steps__title {
+    position: relative;
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;           /* bumped from 32px */
+    font-weight: 400;
+    color: var(--tyde-text);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    line-height: 1;
+    margin: 0 0 10px;
+    z-index: 2;
+  }
+  .tyde-steps__title::after {
+    content: ""; position: absolute;
+    left: -4px; right: -4px; bottom: 4px;
+    height: 14px; background: var(--tyde-accent);
+    z-index: -1;
+  }
+
+  .tyde-steps__desc {
+    margin: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;           /* bumped from 16px */
+    color: var(--tyde-text);
+    line-height: 1.3;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  .tyde-steps__dash {
+    display: flex; align-items: center;
+    width: 140px; padding: 0 15px;
+    margin-top: 36px;
+  }
+  .tyde-steps__dash svg { width: 100%; }
+
+  .tyde-steps__btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 10px; }
+
+  .tyde-steps__btn {
+    background: var(--tyde-btn-bg);
+    color: var(--tyde-btn-text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;           /* bumped from 20px */
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    border: none; border-radius: 10px;
+    padding: 20px 60px; cursor: pointer;
+    transition: transform .2s ease, opacity .2s ease;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .tyde-steps__btn:hover { transform: translateY(-2px); opacity: .95; }
+  .tyde-steps__btn-accent { color: var(--tyde-btn-accent); }
+
+  .tyde-steps__shipping {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;           /* bumped from 15px */
+    font-weight: 400;
+    color: var(--tyde-text);
+    letter-spacing: 0.5px;
+  }
+  .tyde-steps__shipping svg { width: 28px; height: 28px; fill: var(--tyde-text); flex-shrink: 0; }
+
+  @media (max-width: 991px) {
+    .tyde-steps { padding: 30px 18px; }
+    .tyde-steps__heading { font-size: 36px; letter-spacing: 0.8px; }
+    .tyde-steps__heading-highlight::after { height: 12px; bottom: 2px; }
+    .tyde-steps__row { flex-direction: column; gap: 30px; align-items: flex-start; padding-left: 20px; max-width: 420px; margin: 0 auto; width: 100%; }
+    .tyde-steps__item { width: 100%; align-items: flex-start; }
+    .tyde-steps__icon { width: 68px; height: 68px; }
+    .tyde-steps__icon svg { width: 32px; height: 32px; }
+    .tyde-steps__title { font-size: 30px; margin-bottom: 6px; letter-spacing: 1px; }
+    .tyde-steps__title::after { height: 10px; }
+    .tyde-steps__desc { font-size: 17px; letter-spacing: 0.3px; }
+    .tyde-steps__dash { display: none; }
+    .tyde-steps__btn { padding: 16px 36px; font-size: 20px; letter-spacing: 1px; }
+    .tyde-steps__shipping { font-size: 15px; text-align: center; }
+    .tyde-steps__wrap { gap: 28px; }
+  }
+</style>
+
+<section class="tyde-steps">
+  <div class="tyde-steps__wrap">
+
+    <h2 class="tyde-steps__heading">
+      It's as easy as
+      <span class="tyde-steps__heading-highlight">1, 2, 3</span>
+    </h2>
+
+    <div class="tyde-steps__row">
+
+      <div class="tyde-steps__item">
+        <div class="tyde-steps__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 1.5a5 5 0 00-3.54 1.46L3.96 12.96a5 5 0 107.08 7.08l10-10A5 5 0 0017.5 1.5zm-5 5.66l4.34 4.34-5.88 5.88-4.34-4.34 5.88-5.88z"/></svg>
+        </div>
+        <div class="tyde-steps__body">
+          <p class="tyde-steps__title">Take</p>
+          <p class="tyde-steps__desc">Take 2 capsules every morning with water. No mess, no shake needed.</p>
+        </div>
+      </div>
+
+      <div class="tyde-steps__dash">
+        <svg viewBox="0 0 140 3" preserveAspectRatio="none">
+          <line x1="0" y1="1.5" x2="140" y2="1.5" stroke="#1A6B7C" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="10 10"/>
+        </svg>
+      </div>
+
+      <div class="tyde-steps__item">
+        <div class="tyde-steps__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-5.5-8-11.5a5.5 5.5 0 0110-3.2 5.5 5.5 0 0110 3.2C22 15.5 12 21 12 21z"/></svg>
+        </div>
+        <div class="tyde-steps__body">
+          <p class="tyde-steps__title">Absorb</p>
+          <p class="tyde-steps__desc">Premium natural ingredients go to work supporting energy, focus & balance.</p>
+        </div>
+      </div>
+
+      <div class="tyde-steps__dash">
+        <svg viewBox="0 0 140 3" preserveAspectRatio="none">
+          <line x1="0" y1="1.5" x2="140" y2="1.5" stroke="#1A6B7C" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="10 10"/>
+        </svg>
+      </div>
+
+      <div class="tyde-steps__item">
+        <div class="tyde-steps__icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12L13 2z"/></svg>
+        </div>
+        <div class="tyde-steps__body">
+          <p class="tyde-steps__title">Thrive</p>
+          <p class="tyde-steps__desc">Feel confident, energized, and unstoppable, every single day.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tyde-steps__btn-wrap">
+      <a href="#product-form" class="tyde-steps__btn">
+        Try Tyde <span class="tyde-steps__btn-accent">Risk-Free</span> Today
+      </a>
+      <div class="tyde-steps__shipping">
+        <svg viewBox="0 0 32 32"><path d="M7.8 26.7c-1.1 0-2-.4-2.7-1.1-.8-.8-1.1-1.7-1.1-2.8H1.8V7.9c0-.5.2-1 .6-1.4.4-.4.8-.6 1.4-.6h18.8v5.4h3.4l4.4 5.9v5.6h-2.3c0 1.1-.4 2-1.1 2.8-.8.8-1.7 1.1-2.7 1.1s-2-.4-2.7-1.1c-.8-.8-1.1-1.7-1.1-2.8h-8.8c0 1.1-.4 2-1.1 2.7-.8.7-1.7 1.1-2.8 1.1z"/></svg>
+        Free shipping on orders over $999*
+      </div>
+    </div>
+
+  </div>
+</section>
