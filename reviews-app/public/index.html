@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reviews Importer — Upload CSV</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>★ Reviews Importer</h1>
+      <p class="sub">Upload a CSV to import product reviews into your Shopify store.</p>
+    </header>
+
+    <section class="card">
+      <h2>Upload CSV file</h2>
+
+      <form id="form">
+        <label id="drop" class="drop" for="file">
+          <input type="file" id="file" name="file" accept=".csv,text/csv" hidden />
+          <div class="drop-inner">
+            <div class="drop-icon">⬆</div>
+            <p class="drop-text"><strong>Choose a CSV file</strong> or drag &amp; drop it here</p>
+            <p class="drop-hint" id="fileName">No file selected</p>
+          </div>
+        </label>
+
+        <label class="sync-row">
+          <input type="checkbox" id="sync" name="sync" checked />
+          <span>Also sync to Shopify (metaobjects) when configured</span>
+        </label>
+
+        <button type="submit" id="submit" disabled>Import reviews</button>
+      </form>
+
+      <details class="schema">
+        <summary>Required CSV columns</summary>
+        <p>Your header row must include these columns (extra columns are ignored):</p>
+        <code>rating,handle,author,email,title,content,images,created_at,country_code</code>
+        <ul>
+          <li><b>rating</b> — integer 1–5 <i>(required)</i></li>
+          <li><b>handle</b> — product handle the review belongs to <i>(required)</i></li>
+          <li><b>content</b> — the review body text <i>(required)</i></li>
+          <li><b>author, email, title, created_at, country_code</b> — optional</li>
+          <li><b>images</b> — optional, comma-separated image URLs inside one quoted cell</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card result" id="result" hidden>
+      <h2>Import result</h2>
+      <div id="resultBody"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

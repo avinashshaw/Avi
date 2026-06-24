@@ -1,0 +1,122 @@
+{% comment %}
+  Product Reviews — storefront section
+  ------------------------------------
+  Renders the reviews imported by the Reviews Importer app. Reviews are stored
+  as Shopify metaobjects of type "product_review" (created automatically when
+  you enable Shopify sync in the importer).
+
+  Install:
+    1. Copy this file to your theme: sections/product-reviews.liquid
+    2. On the product template, add the section (Theme editor -> Add section ->
+       "Product reviews"), or include it in product.liquid:
+         {% section 'product-reviews' %}
+
+  It matches reviews whose `handle` field equals the current product handle.
+{% endcomment %}
+
+{% liquid
+  assign all_reviews = shop.metaobjects.product_review.values
+  assign total = 0
+  assign sum = 0
+%}
+
+<div class="prv" id="product-reviews">
+  <h2 class="prv__title">{{ section.settings.heading | default: 'Customer Reviews' }}</h2>
+
+  {% comment %} First pass: compute count + average for this product. {% endcomment %}
+  {% for review in all_reviews %}
+    {% if review.handle.value == product.handle %}
+      {% assign total = total | plus: 1 %}
+      {% assign sum = sum | plus: review.rating.value %}
+    {% endif %}
+  {% endfor %}
+
+  {% if total > 0 %}
+    {% assign average = sum | divided_by: total | round: 1 %}
+    {% comment %} divided_by on integers truncates — recompute with times for 1 decimal {% endcomment %}
+    {% assign avg10 = sum | times: 10 | divided_by: total %}
+    {% assign average = avg10 | divided_by: 10.0 %}
+
+    <div class="prv__summary">
+      <span class="prv__avg">{{ average }}</span>
+      <span class="prv__stars" aria-hidden="true">
+        {% for i in (1..5) %}{% if i <= average %}★{% else %}☆{% endif %}{% endfor %}
+      </span>
+      <span class="prv__count">{{ total }} review{% if total != 1 %}s{% endif %}</span>
+    </div>
+
+    <ul class="prv__list">
+      {% for review in all_reviews %}
+        {% if review.handle.value == product.handle %}
+          <li class="prv__item">
+            <div class="prv__head">
+              <span class="prv__stars" aria-label="{{ review.rating.value }} out of 5">
+                {% for i in (1..5) %}{% if i <= review.rating.value %}★{% else %}☆{% endif %}{% endfor %}
+              </span>
+              <strong class="prv__author">{{ review.author.value | default: 'Anonymous' | escape }}</strong>
+              {% if review.country_code.value != blank %}
+                <span class="prv__country">{{ review.country_code.value | escape }}</span>
+              {% endif %}
+            </div>
+
+            {% if review.title.value != blank %}
+              <p class="prv__rtitle">{{ review.title.value | escape }}</p>
+            {% endif %}
+
+            <p class="prv__content">{{ review.content.value | escape | newline_to_br }}</p>
+
+            {% assign imgs = review.images.value %}
+            {% if imgs != blank %}
+              <div class="prv__images">
+                {% for url in imgs %}
+                  <img src="{{ url }}" alt="Review image" loading="lazy" />
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% if review.created_at.value != blank %}
+              <time class="prv__date">{{ review.created_at.value | date: '%b %d, %Y' }}</time>
+            {% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="prv__empty">No reviews yet.</p>
+  {% endif %}
+</div>
+
+<style>
+  .prv { max-width: 820px; margin: 40px auto; font-family: inherit; }
+  .prv__title { font-size: 24px; margin-bottom: 12px; }
+  .prv__summary { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .prv__avg { font-size: 28px; font-weight: 700; }
+  .prv__stars { color: #f5a623; letter-spacing: 2px; }
+  .prv__count { color: #666; }
+  .prv__list { list-style: none; margin: 0; padding: 0; }
+  .prv__item { border-top: 1px solid #e6e6e6; padding: 18px 0; }
+  .prv__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .prv__author { font-size: 14px; }
+  .prv__country { font-size: 12px; color: #999; border: 1px solid #ddd; border-radius: 4px; padding: 0 5px; }
+  .prv__rtitle { font-weight: 600; margin: 8px 0 4px; }
+  .prv__content { margin: 4px 0; color: #333; }
+  .prv__images { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .prv__images img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; }
+  .prv__date { font-size: 12px; color: #999; }
+  .prv__empty { color: #888; }
+</style>
+
+{% schema %}
+{
+  "name": "Product reviews",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Customer Reviews"
+    }
+  ],
+  "presets": [{ "name": "Product reviews" }]
+}
+{% endschema %}
