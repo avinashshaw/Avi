@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="shopify-api-key" content="%SHOPIFY_API_KEY%" />
   <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
-  <title>Reviews Importer</title>
+  <title>Reviews Import / Export</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <main class="page">
     <div class="topbar">
-      <h1>Reviews Importer</h1>
-      <p>Import product reviews from a CSV file. Reviews are saved to your store as metaobjects.</p>
+      <h1>Product Reviews — Import / Export</h1>
+      <p>Import reviews from a CSV file or export your existing reviews back to CSV. Reviews are saved to your store as metaobjects.</p>
     </div>
 
     <section class="card">
-      <h2>Upload CSV file</h2>
+      <h2>Import reviews (CSV)</h2>
 
       <form id="form">
         <label id="drop" class="drop" for="file">
@@ -47,6 +47,16 @@
     <section class="card" id="result" hidden>
       <h2>Import result</h2>
       <div id="resultBody"></div>
+    </section>
+
+    <section class="card">
+      <h2>Export reviews (CSV)</h2>
+      <p class="muted">Download your reviews in the same format used for import. Leave the filter empty to export every product.</p>
+      <div class="export-row">
+        <input type="text" id="exportHandle" placeholder="Product handle (optional)" />
+        <button type="button" id="exportBtn" class="secondary">Export CSV</button>
+      </div>
+      <div id="exportMsg"></div>
     </section>
 
     <section class="card">

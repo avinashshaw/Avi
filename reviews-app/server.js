@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 
 import shopify from './lib/config.js';
 import webhookHandlers from './lib/webhooks.js';
-import { parseCsv, rowsToReviews, REVIEW_FIELDS } from './lib/csv.js';
+import { parseCsv, rowsToReviews, reviewsToCsv, REVIEW_FIELDS } from './lib/csv.js';
 import { saveReviews, listReviews, summary } from './lib/store.js';
 import { syncReviews } from './lib/metaobjects.js';
 
@@ -107,6 +107,29 @@ app.get('/api/reviews', async (req, res) => {
 app.get('/api/summary', async (_req, res) => {
   const { session } = clientFor(res);
   res.json({ ok: true, shop: session.shop, products: await summary(session.shop) });
+});
+
+// Export all (or one product's) reviews as a CSV download, using the same
+// column schema as the importer so the file round-trips back through /api/import.
+app.get('/api/export', async (req, res) => {
+  try {
+    const { session } = clientFor(res);
+    const handle = req.query.handle || undefined;
+    const reviews = await listReviews(session.shop, handle);
+    const csv = reviewsToCsv(reviews);
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    const slug = (handle || session.shop.replace(/\.myshopify\.com$/, '')).replace(
+      /[^a-z0-9.-]/gi,
+      '_'
+    );
+    res.set('Content-Type', 'text/csv; charset=utf-8');
+    res.set('Content-Disposition', `attachment; filename="reviews-${slug}-${stamp}.csv"`);
+    res.set('X-Review-Count', String(reviews.length));
+    res.send(csv);
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
 // --- Embedded frontend -----------------------------------------------------

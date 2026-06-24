@@ -153,3 +153,41 @@ export function rowsToReviews(rows) {
 
   return { reviews, errors, headers: header };
 }
+
+// --- Serialisation (export) ------------------------------------------------
+
+/** Quote a single CSV cell per RFC-4180 when it contains , " or a newline. */
+function escapeCell(value) {
+  const s = value == null ? '' : String(value);
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+/**
+ * Serialise review objects back into a CSV string using the exact same
+ * column schema reviews are imported in (REVIEW_FIELDS). Round-trips cleanly:
+ * parseCsv(reviewsToCsv(x)) -> rowsToReviews -> x.
+ * @param {object[]} reviews
+ * @returns {string}
+ */
+export function reviewsToCsv(reviews) {
+  const lines = [REVIEW_FIELDS.join(',')];
+
+  for (const r of reviews) {
+    const images = Array.isArray(r.images) ? r.images.join(',') : r.images || '';
+    const row = [
+      r.rating,
+      r.handle,
+      r.author,
+      r.email,
+      r.title,
+      r.content,
+      images,
+      r.created_at,
+      r.country_code,
+    ];
+    lines.push(row.map(escapeCell).join(','));
+  }
+
+  // Prepend a UTF-8 BOM so Excel opens accented characters correctly.
+  return '﻿' + lines.join('\r\n') + '\r\n';
+}

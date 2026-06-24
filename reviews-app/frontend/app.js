@@ -10,6 +10,9 @@ const form = document.getElementById('form');
 const result = document.getElementById('result');
 const resultBody = document.getElementById('resultBody');
 const summaryBody = document.getElementById('summaryBody');
+const exportBtn = document.getElementById('exportBtn');
+const exportHandle = document.getElementById('exportHandle');
+const exportMsg = document.getElementById('exportMsg');
 
 // Authenticated fetch — attaches the App Bridge session token so the server's
 // validateAuthenticatedSession middleware accepts the request.
@@ -162,5 +165,55 @@ async function loadSummary() {
     summaryBody.innerHTML = `<p class="muted">Could not load summary.</p>`;
   }
 }
+
+// --- Export to CSV ---------------------------------------------------------
+// The export endpoint requires the App Bridge token in the Authorization
+// header, so we fetch it as a blob and trigger a client-side download rather
+// than using a plain link.
+exportBtn.addEventListener('click', async () => {
+  exportBtn.disabled = true;
+  exportBtn.textContent = 'Exporting…';
+  exportMsg.innerHTML = '';
+
+  try {
+    const handle = exportHandle.value.trim();
+    const url = handle ? `/api/export?handle=${encodeURIComponent(handle)}` : '/api/export';
+    const res = await authFetch(url);
+
+    if (!res.ok) {
+      let msg = `Export failed (HTTP ${res.status}).`;
+      try {
+        const j = await res.json();
+        if (j.error) msg = j.error;
+      } catch {}
+      throw new Error(msg);
+    }
+
+    const count = res.headers.get('X-Review-Count') || '?';
+    const blob = await res.blob();
+
+    // Derive filename from Content-Disposition, with a sensible fallback.
+    const cd = res.headers.get('Content-Disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : 'reviews.csv';
+
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objUrl);
+
+    exportMsg.innerHTML = `<div class="notice ok">Exported ${count} review(s) to ${esc(filename)}.</div>`;
+    if (window.shopify?.toast) window.shopify.toast.show(`Exported ${count} review(s)`);
+  } catch (err) {
+    exportMsg.innerHTML = `<div class="notice err">${esc(err.message)}</div>`;
+  } finally {
+    exportBtn.disabled = false;
+    exportBtn.textContent = 'Export CSV';
+  }
+});
 
 loadSummary();

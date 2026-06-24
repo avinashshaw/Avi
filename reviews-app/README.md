@@ -15,6 +15,8 @@ rating,handle,author,email,title,content,images,created_at,country_code
 - **OAuth install flow** + session storage (`@shopify/shopify-app-express`)
 - **Embedded admin UI** (App Bridge + drag-and-drop CSV upload)
 - **CSV importer**: RFC-4180 parser, per-row validation, content-hash de-dup
+- **CSV exporter**: download all (or one product's) reviews in the same schema —
+  round-trips cleanly back through the importer
 - **Metaobject sync**: creates the `product_review` definition automatically and
   upserts one metaobject per review
 - **Webhooks**: `app/uninstalled` cleanup + the three mandatory GDPR/compliance
@@ -79,7 +81,21 @@ land on the embedded importer inside the Shopify admin.
 3. The server parses + validates the CSV, saves reviews to
    `data/reviews-<shop>.json` (de-duplicated), then upserts each as a
    `product_review` metaobject via the Admin GraphQL API.
-4. On uninstall / shop redact, the shop's stored data is deleted.
+4. To export, the merchant clicks **Export CSV** (optionally filtered by product
+   handle). The server serialises the stored reviews back into the same column
+   schema and streams it as a file download.
+5. On uninstall / shop redact, the shop's stored data is deleted.
+
+### API endpoints
+
+| Method | Route                       | Purpose                                  |
+| ------ | --------------------------- | ---------------------------------------- |
+| POST   | `/api/import`               | Upload + import a reviews CSV            |
+| GET    | `/api/export?handle=...`    | Download reviews as CSV (handle optional)|
+| GET    | `/api/reviews?handle=...`   | List stored reviews as JSON             |
+| GET    | `/api/summary`              | Per-product count + average rating       |
+
+All `/api/*` routes require a valid embedded App Bridge session token.
 
 ## Show reviews on the storefront
 

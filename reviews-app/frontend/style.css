@@ -64,6 +64,30 @@ button {
 }
 button:disabled { opacity: .5; cursor: not-allowed; }
 
+button.secondary {
+  margin-top: 0;
+  width: auto;
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.export-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.export-row input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
 .schema { margin-top: 16px; font-size: 13px; color: var(--muted); }
 .schema summary { cursor: pointer; font-weight: 600; color: var(--ink); }
 .schema code {
