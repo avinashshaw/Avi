@@ -1,18 +1,23 @@
 import 'dotenv/config';
 import express from 'express';
 import multer from 'multer';
-import { dirname, resolve } from 'node:path';
+import serveStatic from 'serve-static';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFile } from 'node:fs/promises';
 
+import shopify from './lib/config.js';
+import webhookHandlers from './lib/webhooks.js';
 import { parseCsv, rowsToReviews, REVIEW_FIELDS } from './lib/csv.js';
 import { saveReviews, listReviews, summary } from './lib/store.js';
-import * as shopify from './lib/shopify.js';
+import { syncReviews } from './lib/metaobjects.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const FRONTEND = join(__dirname, 'frontend');
 
-// CSV uploads only, capped at 10 MB, kept in memory (we parse, never store the file).
+const app = express();
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -26,18 +31,39 @@ const upload = multer({
   },
 });
 
-app.use(express.json());
-app.use(express.static(resolve(__dirname, 'public')));
+// --- OAuth install flow ----------------------------------------------------
+app.get(shopify.config.auth.path, shopify.auth.begin());
+app.get(
+  shopify.config.auth.callbackPath,
+  shopify.auth.callback(),
+  shopify.redirectToShopifyOrAppRoot()
+);
 
-// --- Core endpoint: upload + parse a reviews CSV ---------------------------
+// --- Webhooks (raw body verified by the framework) -------------------------
+app.post(
+  shopify.config.webhooks.path,
+  shopify.processWebhooks({ webhookHandlers })
+);
+
+// --- Authenticated API -----------------------------------------------------
+// Every /api/* route below this point requires a valid embedded session token.
+app.use('/api/*splat', shopify.validateAuthenticatedSession());
+app.use(express.json());
+
+function clientFor(res) {
+  const session = res.locals.shopify.session;
+  return { session, gql: new shopify.api.clients.Graphql({ session }) };
+}
+
+// Core endpoint: upload + import a reviews CSV.
 app.post('/api/import', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ ok: false, error: 'No file uploaded.' });
     }
 
-    const text = req.file.buffer.toString('utf8');
-    const rows = parseCsv(text);
+    const { session, gql } = clientFor(res);
+    const rows = parseCsv(req.file.buffer.toString('utf8'));
     const { reviews, errors, headers } = rowsToReviews(rows);
 
     if (!reviews.length) {
@@ -50,52 +76,60 @@ app.post('/api/import', upload.single('file'), async (req, res) => {
       });
     }
 
-    // 1) Always persist locally.
-    const saved = await saveReviews(reviews);
+    const saved = await saveReviews(session.shop, reviews);
 
-    // 2) Optionally push to Shopify.
-    let shopifyResult = { configured: false };
-    const syncRequested = req.query.sync !== 'false';
-    if (shopify.isConfigured() && syncRequested) {
-      const stored = await listReviews();
-      const justAdded = stored.slice(0, saved.added);
-      shopifyResult = { configured: true, ...(await shopify.syncReviews(justAdded)) };
+    // Push the newly added reviews to Shopify as metaobjects.
+    let shopifyResult = { synced: 0, failed: 0, errors: [] };
+    if (saved.added.length) {
+      shopifyResult = await syncReviews(gql, saved.added);
     }
 
     res.json({
       ok: true,
       parsed: reviews.length,
-      added: saved.added,
+      added: saved.added.length,
       duplicates: saved.duplicates,
       totalStored: saved.total,
       rowErrors: errors,
       shopify: shopifyResult,
-      preview: reviews.slice(0, 5),
+      preview: saved.added.slice(0, 5),
     });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
 
-// --- Read endpoints (used by the storefront Liquid section & dashboard) -----
 app.get('/api/reviews', async (req, res) => {
-  res.json({ ok: true, reviews: await listReviews(req.query.handle) });
+  const { session } = clientFor(res);
+  res.json({ ok: true, reviews: await listReviews(session.shop, req.query.handle) });
 });
 
 app.get('/api/summary', async (_req, res) => {
-  res.json({ ok: true, shopifyConfigured: shopify.isConfigured(), products: await summary() });
+  const { session } = clientFor(res);
+  res.json({ ok: true, shop: session.shop, products: await summary(session.shop) });
 });
 
-// Multer / generic error handler.
+// --- Embedded frontend -----------------------------------------------------
+app.use(shopify.cspHeaders());
+app.use(serveStatic(FRONTEND, { index: false }));
+
+// Serve the embedded app for the root and any other non-API path.
+app.use(shopify.ensureInstalledOnShop(), async (_req, res) => {
+  const html = (await readFile(join(FRONTEND, 'index.html'), 'utf8')).replace(
+    /%SHOPIFY_API_KEY%/g,
+    process.env.SHOPIFY_API_KEY || ''
+  );
+  res.set('Content-Type', 'text/html').send(html);
+});
+
+// Generic error handler (e.g. multer file-type/size errors).
 app.use((err, _req, res, _next) => {
   res.status(400).json({ ok: false, error: err.message });
 });
 
 app.listen(PORT, () => {
-  console.log(`Shopify Reviews App running at http://localhost:${PORT}`);
-  console.log(
-    shopify.isConfigured()
-      ? `Shopify sync: ENABLED (${process.env.SHOPIFY_SHOP})`
-      : 'Shopify sync: disabled (local JSON only — set SHOPIFY_* in .env to enable)'
-  );
+  console.log(`Reviews app listening on ${process.env.SHOPIFY_APP_URL || `http://localhost:${PORT}`}`);
+  if (!process.env.SHOPIFY_API_KEY || !process.env.SHOPIFY_API_SECRET) {
+    console.warn('⚠  SHOPIFY_API_KEY / SHOPIFY_API_SECRET are not set — see .env.example');
+  }
 });

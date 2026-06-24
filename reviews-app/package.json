@@ -1,7 +1,7 @@
 {
   "name": "shopify-reviews-app",
-  "version": "1.0.0",
-  "description": "Shopify product reviews app — import reviews from a CSV file (rating, handle, author, email, title, content, images, created_at, country_code).",
+  "version": "2.0.0",
+  "description": "Installable Shopify app — import product reviews from a CSV file (rating, handle, author, email, title, content, images, created_at, country_code) and store them as metaobjects.",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -12,8 +12,11 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@shopify/shopify-api": "^11.0.0",
+    "@shopify/shopify-app-express": "^7.0.0",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "multer": "^1.4.5-lts.1"
+    "express": "^5.0.0",
+    "multer": "^2.2.0",
+    "serve-static": "^1.16.2"
   }
 }

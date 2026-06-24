@@ -1,0 +1,40 @@
+# Shopify app configuration.
+# Run `shopify app config link` (Shopify CLI) to connect this to an app in your
+# Partner account, or fill in client_id and application_url manually.
+#
+# Docs: https://shopify.dev/docs/apps/build/cli-for-apps/app-configuration
+
+name = "Reviews Importer"
+# client_id is your app's API key from the Partner Dashboard.
+client_id = "REPLACE_WITH_CLIENT_ID"
+application_url = "https://REPLACE_WITH_YOUR_TUNNEL_OR_HOST"
+embedded = true
+
+[access_scopes]
+scopes = "read_products,read_metaobjects,write_metaobjects"
+
+[auth]
+redirect_urls = [
+  "https://REPLACE_WITH_YOUR_TUNNEL_OR_HOST/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-10"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/api/webhooks"
+
+  [[webhooks.subscriptions]]
+  compliance_topics = [
+    "customers/data_request",
+    "customers/redact",
+    "shop/redact"
+  ]
+  uri = "/api/webhooks"
+
+[pos]
+embedded = false
+
+[build]
+include_config_on_deploy = true

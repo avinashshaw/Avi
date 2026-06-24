@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reviews Importer — Upload CSV</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="shopify-api-key" content="%SHOPIFY_API_KEY%" />
+  <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+  <title>Reviews Importer</title>
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <main class="wrap">
-    <header class="head">
-      <h1>★ Reviews Importer</h1>
-      <p class="sub">Upload a CSV to import product reviews into your Shopify store.</p>
-    </header>
+  <main class="page">
+    <div class="topbar">
+      <h1>Reviews Importer</h1>
+      <p>Import product reviews from a CSV file. Reviews are saved to your store as metaobjects.</p>
+    </div>
 
     <section class="card">
       <h2>Upload CSV file</h2>
@@ -25,12 +27,6 @@
             <p class="drop-hint" id="fileName">No file selected</p>
           </div>
         </label>
-
-        <label class="sync-row">
-          <input type="checkbox" id="sync" name="sync" checked />
-          <span>Also sync to Shopify (metaobjects) when configured</span>
-        </label>
-
         <button type="submit" id="submit" disabled>Import reviews</button>
       </form>
 
@@ -48,12 +44,17 @@
       </details>
     </section>
 
-    <section class="card result" id="result" hidden>
+    <section class="card" id="result" hidden>
       <h2>Import result</h2>
       <div id="resultBody"></div>
     </section>
+
+    <section class="card">
+      <h2>Imported products</h2>
+      <div id="summaryBody"><p class="muted">Loading…</p></div>
+    </section>
   </main>
 
-  <script src="app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
