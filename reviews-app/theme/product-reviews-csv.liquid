@@ -1,0 +1,400 @@
+{% comment %}
+  Product Reviews (CSV) — standalone theme section
+  ------------------------------------------------
+  Self-contained. No app, no backend, no external dependencies.
+
+  • IMPORT: paste your reviews CSV into the "Reviews CSV data" setting in the
+    theme editor (it is saved with the theme), and/or let visitors/merchants
+    load a CSV file client-side with the upload control.
+  • RENDER: JavaScript parses the CSV and shows the reviews, with a star
+    average. On a product page it can auto-filter to the current product handle.
+  • EXPORT: the "Export CSV" button downloads the currently shown reviews as a
+    CSV file in the exact same column schema:
+      rating,handle,author,email,title,content,images,created_at,country_code
+
+  Install:
+    1. Copy this file to your theme: sections/product-reviews-csv.liquid
+    2. Add the "Product reviews (CSV)" section from the theme editor, or include
+       it in a template with: {% section 'product-reviews-csv' %}
+{% endcomment %}
+
+{%- liquid
+  assign sid = section.id
+  assign accent = section.settings.accent_color
+-%}
+
+<div
+  class="rcsv"
+  id="rcsv-{{ sid }}"
+  style="--rcsv-accent: {{ accent }};"
+  data-filter="{{ section.settings.filter_by_handle }}"
+  data-images="{{ section.settings.show_images }}"
+  data-summary="{{ section.settings.show_summary }}"
+  data-initial="{{ section.settings.initial_count }}"
+>
+  {%- if section.settings.heading != blank -%}
+    <h2 class="rcsv__title">{{ section.settings.heading }}</h2>
+  {%- endif -%}
+  {%- if section.settings.intro != blank -%}
+    <p class="rcsv__intro">{{ section.settings.intro }}</p>
+  {%- endif -%}
+
+  <div class="rcsv__summary" data-rcsv-summary hidden></div>
+
+  {%- if section.settings.enable_upload -%}
+    <div class="rcsv__tools">
+      <label class="rcsv__upload">
+        <input type="file" accept=".csv,text/csv" data-rcsv-file hidden />
+        <span class="rcsv__btn rcsv__btn--ghost">Load CSV file…</span>
+      </label>
+      {%- if section.settings.show_export -%}
+        <button type="button" class="rcsv__btn" data-rcsv-export>Export CSV</button>
+      {%- endif -%}
+    </div>
+  {%- elsif section.settings.show_export -%}
+    <div class="rcsv__tools">
+      <button type="button" class="rcsv__btn" data-rcsv-export>Export CSV</button>
+    </div>
+  {%- endif -%}
+
+  <div class="rcsv__msg" data-rcsv-msg></div>
+  <ul class="rcsv__list" data-rcsv-list></ul>
+  <div class="rcsv__more" hidden>
+    <button type="button" class="rcsv__btn rcsv__btn--ghost" data-rcsv-more>Show more reviews</button>
+  </div>
+
+  {%- comment -%} Persisted CSV (from the section setting) + page context. {%- endcomment -%}
+  <script type="application/json" data-rcsv-config>
+    {
+      "csv": {{ section.settings.csv_data | json }},
+      "handle": {{ product.handle | json }},
+      "exportName": {{ product.handle | default: 'reviews' | json }}
+    }
+  </script>
+</div>
+
+<style>
+  #rcsv-{{ sid }} { --rcsv-accent: {{ accent }}; }
+  .rcsv { max-width: 860px; margin: 40px auto; font-family: inherit; color: #1a1a1a; }
+  .rcsv__title { font-size: 24px; margin: 0 0 6px; }
+  .rcsv__intro { margin: 0 0 18px; color: #666; }
+  .rcsv__summary { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .rcsv__avg { font-size: 28px; font-weight: 700; }
+  .rcsv__count { color: #666; }
+  .rcsv__stars { color: var(--rcsv-accent); letter-spacing: 2px; white-space: nowrap; }
+  .rcsv__stars--muted { color: #d9d9d9; }
+  .rcsv__tools { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .rcsv__btn {
+    display: inline-block; padding: 9px 16px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--rcsv-accent); background: var(--rcsv-accent); color: #fff;
+    font-size: 14px; font-weight: 600; line-height: 1.2;
+  }
+  .rcsv__btn--ghost { background: #fff; color: var(--rcsv-accent); }
+  .rcsv__upload { display: inline-block; }
+  .rcsv__msg { font-size: 14px; margin-bottom: 12px; }
+  .rcsv__msg.is-error { color: #c0392b; }
+  .rcsv__msg.is-ok { color: #1f7a4d; }
+  .rcsv__list { list-style: none; margin: 0; padding: 0; }
+  .rcsv__item { border-top: 1px solid #ececec; padding: 18px 0; }
+  .rcsv__head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rcsv__author { font-size: 14px; font-weight: 600; }
+  .rcsv__country { font-size: 12px; color: #999; border: 1px solid #ddd; border-radius: 4px; padding: 0 5px; }
+  .rcsv__date { font-size: 12px; color: #999; margin-left: auto; }
+  .rcsv__rtitle { font-weight: 600; margin: 8px 0 4px; }
+  .rcsv__content { margin: 4px 0; color: #333; white-space: pre-line; }
+  .rcsv__images { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 2px; }
+  .rcsv__images img { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; }
+  .rcsv__empty { color: #888; }
+  .rcsv__more { margin-top: 16px; text-align: center; }
+</style>
+
+<script>
+(function () {
+  var root = document.getElementById('rcsv-{{ sid }}');
+  if (!root || root.dataset.rcsvInit) return;
+  root.dataset.rcsvInit = '1';
+
+  var FIELDS = ['rating','handle','author','email','title','content','images','created_at','country_code'];
+
+  // --- RFC-4180 CSV parser (quoted fields, escaped quotes, embedded commas/newlines) ---
+  function parseCsv(text) {
+    var input = String(text || '').replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+    var rows = [], row = [], field = '', q = false;
+    for (var i = 0; i < input.length; i++) {
+      var c = input[i];
+      if (q) {
+        if (c === '"') { if (input[i + 1] === '"') { field += '"'; i++; } else { q = false; } }
+        else { field += c; }
+      } else if (c === '"') { q = true; }
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else { field += c; }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function rowsToReviews(rows) {
+    if (!rows.length) return [];
+    var header = rows[0].map(function (h) { return h.trim().toLowerCase(); });
+    var idx = {};
+    FIELDS.forEach(function (f) { idx[f] = header.indexOf(f); });
+    if (idx.rating === -1 || idx.handle === -1 || idx.content === -1) return [];
+    function cell(cols, f) { var i = idx[f]; return (i === -1 || i >= cols.length) ? '' : (cols[i] || '').trim(); }
+    var out = [];
+    for (var r = 1; r < rows.length; r++) {
+      var cols = rows[r];
+      if (cols.length === 1 && cols[0].trim() === '') continue;
+      var rating = parseInt(cell(cols, 'rating'), 10);
+      var handle = cell(cols, 'handle');
+      var content = cell(cols, 'content');
+      if (!handle || !content || !(rating >= 1 && rating <= 5)) continue;
+      out.push({
+        rating: rating,
+        handle: handle,
+        author: cell(cols, 'author') || 'Anonymous',
+        email: cell(cols, 'email'),
+        title: cell(cols, 'title'),
+        content: content,
+        images: cell(cols, 'images').split(',').map(function (u) { return u.trim(); }).filter(Boolean),
+        created_at: cell(cols, 'created_at'),
+        country_code: cell(cols, 'country_code').toUpperCase()
+      });
+    }
+    return out;
+  }
+
+  function escCell(v) {
+    var s = v == null ? '' : String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function reviewsToCsv(list) {
+    var lines = [FIELDS.join(',')];
+    list.forEach(function (r) {
+      lines.push([
+        r.rating, r.handle, r.author, r.email, r.title, r.content,
+        (r.images || []).join(','), r.created_at, r.country_code
+      ].map(escCell).join(','));
+    });
+    return '﻿' + lines.join('\r\n') + '\r\n';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function stars(n) {
+    var full = Math.round(n);
+    return '<span class="rcsv__stars">' + Array(full + 1).join('★') +
+      '<span class="rcsv__stars--muted">' + Array(6 - full).join('★') + '</span></span>';
+  }
+  function fmtDate(s) {
+    if (!s) return '';
+    var d = new Date(s.replace(' ', 'T'));
+    return isNaN(d) ? s : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  // --- DOM refs + config ---
+  var cfgEl = root.querySelector('[data-rcsv-config]');
+  var cfg = {};
+  try { cfg = JSON.parse(cfgEl.textContent); } catch (e) {}
+  var listEl = root.querySelector('[data-rcsv-list]');
+  var summaryEl = root.querySelector('[data-rcsv-summary]');
+  var msgEl = root.querySelector('[data-rcsv-msg]');
+  var moreWrap = root.querySelector('.rcsv__more');
+  var moreBtn = root.querySelector('[data-rcsv-more]');
+  var exportBtn = root.querySelector('[data-rcsv-export]');
+  var fileInput = root.querySelector('[data-rcsv-file]');
+
+  var filterByHandle = root.dataset.filter === 'true' && !!cfg.handle;
+  var showImages = root.dataset.images === 'true';
+  var showSummary = root.dataset.summary === 'true';
+  var initial = parseInt(root.dataset.initial, 10) || 5;
+
+  var allReviews = [];   // everything parsed from current source
+  var shown = [];        // after handle filter
+  var visible = 0;
+
+  function setMsg(text, kind) {
+    msgEl.textContent = text || '';
+    msgEl.className = 'rcsv__msg' + (kind ? ' is-' + kind : '');
+  }
+
+  function load(csv, sourceLabel) {
+    allReviews = rowsToReviews(parseCsv(csv));
+    shown = filterByHandle
+      ? allReviews.filter(function (r) { return r.handle === cfg.handle; })
+      : allReviews.slice();
+    shown.sort(function (a, b) { return new Date(b.created_at || 0) - new Date(a.created_at || 0); });
+    visible = 0;
+    render();
+    if (sourceLabel) setMsg('Loaded ' + shown.length + ' review(s) from ' + sourceLabel + '.', 'ok');
+  }
+
+  function render() {
+    // Summary
+    if (showSummary && shown.length) {
+      var sum = shown.reduce(function (a, r) { return a + r.rating; }, 0);
+      var avg = Math.round((sum / shown.length) * 10) / 10;
+      summaryEl.hidden = false;
+      summaryEl.innerHTML =
+        '<span class="rcsv__avg">' + avg + '</span>' + stars(avg) +
+        '<span class="rcsv__count">' + shown.length + ' review' + (shown.length === 1 ? '' : 's') + '</span>';
+    } else {
+      summaryEl.hidden = true;
+      summaryEl.innerHTML = '';
+    }
+
+    if (!shown.length) {
+      listEl.innerHTML = '<li class="rcsv__empty">No reviews yet.</li>';
+      moreWrap.hidden = true;
+      return;
+    }
+
+    visible = Math.min(visible === 0 ? initial : visible, shown.length);
+    var html = '';
+    for (var i = 0; i < visible; i++) {
+      var r = shown[i];
+      var imgs = (showImages && r.images.length)
+        ? '<div class="rcsv__images">' + r.images.map(function (u) {
+            return '<img src="' + esc(u) + '" alt="Review image" loading="lazy" />';
+          }).join('') + '</div>'
+        : '';
+      html +=
+        '<li class="rcsv__item">' +
+          '<div class="rcsv__head">' + stars(r.rating) +
+            '<span class="rcsv__author">' + esc(r.author) + '</span>' +
+            (r.country_code ? '<span class="rcsv__country">' + esc(r.country_code) + '</span>' : '') +
+            (r.created_at ? '<time class="rcsv__date">' + esc(fmtDate(r.created_at)) + '</time>' : '') +
+          '</div>' +
+          (r.title ? '<p class="rcsv__rtitle">' + esc(r.title) + '</p>' : '') +
+          '<p class="rcsv__content">' + esc(r.content) + '</p>' + imgs +
+        '</li>';
+    }
+    listEl.innerHTML = html;
+    moreWrap.hidden = visible >= shown.length;
+  }
+
+  if (moreBtn) moreBtn.addEventListener('click', function () {
+    visible = Math.min(visible + initial, shown.length);
+    render();
+  });
+
+  if (exportBtn) exportBtn.addEventListener('click', function () {
+    if (!shown.length) { setMsg('Nothing to export.', 'error'); return; }
+    var csv = reviewsToCsv(shown);
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'reviews-' + (cfg.exportName || 'export') + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    setMsg('Exported ' + shown.length + ' review(s).', 'ok');
+  });
+
+  if (fileInput) fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { load(reader.result, f.name); };
+    reader.onerror = function () { setMsg('Could not read the file.', 'error'); };
+    reader.readAsText(f);
+  });
+
+  // Initial render from the persisted section setting.
+  load(cfg.csv || '', '');
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product reviews (CSV)",
+  "tag": "section",
+  "class": "section-product-reviews-csv",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Customer Reviews"
+    },
+    {
+      "type": "text",
+      "id": "intro",
+      "label": "Intro text"
+    },
+    {
+      "type": "textarea",
+      "id": "csv_data",
+      "label": "Reviews CSV data",
+      "info": "Paste your reviews CSV here (this is the import). First row must be the header: rating,handle,author,email,title,content,images,created_at,country_code"
+    },
+    {
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "checkbox",
+      "id": "filter_by_handle",
+      "label": "Only show reviews for the current product",
+      "info": "On a product page, matches each review's \"handle\" column to the product. Turn off to show all reviews.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_summary",
+      "label": "Show rating summary (average + count)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_images",
+      "label": "Show review images",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "initial_count",
+      "label": "Reviews shown before \"Show more\"",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#f5a623"
+    },
+    {
+      "type": "header",
+      "content": "Import / Export tools"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_upload",
+      "label": "Show \"Load CSV file\" button",
+      "info": "Lets you load a CSV file in the browser to preview it. To save reviews permanently, paste the CSV into the \"Reviews CSV data\" field above.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_export",
+      "label": "Show \"Export CSV\" button",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product reviews (CSV)"
+    }
+  ]
+}
+{% endschema %}

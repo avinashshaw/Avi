@@ -99,10 +99,33 @@ All `/api/*` routes require a valid embedded App Bridge session token.
 
 ## Show reviews on the storefront
 
+There are two theme sections — pick whichever fits how you want to store data:
+
+### A) App-connected section (uses metaobjects)
+
 Copy [`theme/product-reviews.liquid`](./theme/product-reviews.liquid) into your
 theme's `sections/` folder and add the **"Product reviews"** section to the
-product template. It reads the `product_review` metaobjects (which are exposed
-to the storefront) and shows reviews matching the current product's handle.
+product template. It reads the `product_review` metaobjects (created by the app)
+and shows reviews matching the current product's handle. Use this when you've
+installed the app and imported via the admin.
+
+### B) Standalone section — CSV import & export, no app required
+
+Copy [`theme/product-reviews-csv.liquid`](./theme/product-reviews-csv.liquid)
+into your theme's `sections/` folder and add **"Product reviews (CSV)"**. It is
+completely self-contained — no app, no backend, no external scripts:
+
+- **Import**: paste your reviews CSV into the section's **"Reviews CSV data"**
+  setting (saved with the theme), and/or click **Load CSV file** to load one in
+  the browser for a quick preview.
+- **Render**: JavaScript parses the CSV, shows a star average, and (on a product
+  page) can auto-filter to the current product's handle. Includes a "Show more"
+  control.
+- **Export**: the **Export CSV** button downloads the currently shown reviews in
+  the exact same column schema, so it round-trips back through the importer.
+
+Works in any theme; all CSV parsing/serialisation runs client-side using the
+same RFC-4180 logic as the app.
 
 ## Project layout
 
@@ -118,7 +141,9 @@ reviews-app/
 │  ├─ store.js                per-shop JSON storage with de-duplication
 │  └─ metaobjects.js          Admin GraphQL metaobject sync
 ├─ frontend/                  Embedded admin UI (App Bridge)
-├─ theme/product-reviews.liquid   Storefront section
+├─ theme/
+│  ├─ product-reviews.liquid       App-connected section (metaobjects)
+│  └─ product-reviews-csv.liquid   Standalone section (CSV import/export, no app)
 └─ sample-reviews.csv
 ```
 
