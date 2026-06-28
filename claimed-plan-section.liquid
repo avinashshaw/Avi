@@ -1,0 +1,112 @@
+{% comment %} Scarcity "claimed" plan section — Custom Liquid {% endcomment %}
+
+{%- assign claimed = 214 -%}
+{%- assign goal = 300 -%}
+{%- assign return_price = '$99.99' -%}
+{%- assign pct = claimed | times: 100.0 | divided_by: goal | round: 2 -%}
+
+<style>
+.stkclaim {
+  background: #F7F1E8;
+  padding: 56px 24px 60px;
+  font-family: inherit;
+}
+.stkclaim-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+.stkclaim-title {
+  font-family: 'Recoleta', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-weight: 800;
+  font-size: clamp(30px, 5vw, 46px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: #3A241B;
+  margin: 0 0 18px;
+}
+.stkclaim-sub {
+  font-size: clamp(16px, 2.2vw, 19px);
+  line-height: 1.55;
+  color: #6E655C;
+  max-width: 560px;
+  margin: 0 auto 34px;
+}
+
+.stkclaim-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  text-align: left;
+}
+.stkclaim-count {
+  font-size: 17px;
+  color: #4A3B31;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.stkclaim-count b { font-weight: 700; }
+.stkclaim-bang,
+.stkclaim-num { color: #C0402C; font-weight: 800; }
+
+.stkclaim-track {
+  position: relative;
+  flex: 1 1 220px;
+  min-width: 180px;
+  height: 8px;
+  background: #E7DCCC;
+  border-radius: 99px;
+}
+.stkclaim-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #8E2A16, #C0402C);
+}
+.stkclaim-knob {
+  position: absolute;
+  top: 50%;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #C0402C;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 5px rgba(192,64,44,0.22),
+    0 0 14px 4px rgba(192,64,44,0.55);
+}
+.stkclaim-return {
+  font-size: 16px;
+  color: #6E655C;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.stkclaim-return b { color: #3A241B; font-weight: 700; }
+
+@media (max-width: 560px) {
+  .stkclaim-count, .stkclaim-return { font-size: 14px; }
+  .stkclaim-track { flex-basis: 100%; order: 3; }
+}
+</style>
+
+<section class="stkclaim">
+  <div class="stkclaim-inner">
+
+    <h2 class="stkclaim-title">Most people fail because they don't have a plan.</h2>
+    <p class="stkclaim-sub">This offer gives you a real one — the tools, the flavors, and the accountability to actually quit.</p>
+
+    <div class="stkclaim-bar-row">
+      <div class="stkclaim-count">
+        <span class="stkclaim-bang">!</span> <span class="stkclaim-num">{{ claimed }}</span> / {{ goal }} <b>claimed</b>
+      </div>
+      <div class="stkclaim-track">
+        <div class="stkclaim-fill" style="width: {{ pct }}%;"></div>
+        <div class="stkclaim-knob" style="left: {{ pct }}%;"></div>
+      </div>
+      <div class="stkclaim-return">price returns to <b>{{ return_price }}</b> after</div>
+    </div>
+
+  </div>
+</section>
